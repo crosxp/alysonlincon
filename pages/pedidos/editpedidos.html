@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Pedidos</title>
+
+    <!-- Adicione os links para o Bootstrap CSS e JavaScript via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+		<nav class="nav">
+			<a class="nav-link active" aria-current="page" href="/livros">Livros</a>
+			<a class="nav-link" href="/categorias">Categorias</a>
+			<a class="nav-link" href="/usuarios">Usuários</a>
+			<a class="nav-link" href="/pedidos">Pedidos</a>
+		  </nav>
+    </div>
+
+    <div class="container">
+        <h3 class="mt-5">Editar Pedidos</h3>
+        <form id="editar-form">
+           
+            <label for="titulo" class="form-label">ID do Usuário:</label>
+            <input type="number" id="usuario_id" name="usuario_id" required><br><br>
+
+            <label for="titulo" class="form-label">ID do Livro:</label>
+            <input type="number" id="livro_id" name="livro_id" required><br><br>
+
+            
+            <label for="autor" class="form-label">Data de Empréstimo</label>
+            <input type="date" id="data_emprestimo" name="data_emprestimo" required><br><br>
+            
+            <label for="ano_publicacao" class="form-label">Data de Devolução:</label>
+            <input type="date" id="data_devolucao" name="data_devolucao" required><br><br>
+            
+            <label for="pedidos_id" class="form-label">Pedidos:</label>
+            
+            <select id="pediddos_id" class="form-select" name="pedidos_id" required>
+             
+              <!-- Você pode adicionar mais opções de categoria conforme necessário -->
+            </select><br><br>
+
+
+            <input type="hidden" id="id" name="id">
+            <button type="submit" class="btn btn-primary">Adicionar Pedidos</button>
+        </form>
+    </div>
+
+    <script>
+        async function carregarPedidoParaEdicao(id) {
+            try {
+                const response = await fetch(`http://localhost:3000/pedidos/${id}`);
+                const registro = await response.json();
+                document.getElementById('id_usuario').value = registro.id_Usuário;
+                document.getElementById('id_livro').value = registro.id_Livro;
+                document.getElementById('data_emprestimo').value = registro.Data_Empréstimo;
+                document.getElementById('data_devolucao').value = registro.Data_Devolução;
+            } catch (error) {
+                console.error('Erro ao carregar registro para edição:', error);
+            }
+        }
+        
+        document.getElementById('editar-pedido').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const form = document.getElementById('editar-pedido');
+            const id = document.getElementById('id').value;
+            const data = new FormData(form);
+
+            try {
+                const response = await fetch("http://localhost:3000/pedidos/"+id, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(Object.fromEntries(data)),
+                });
+
+                if (response.status === 200) {
+                    alert('Registro atualizado com sucesso!');
+                    window.location.href = '/pedidos'; // Redirecionar de volta para a lista de pedidos
+                } else {
+                    alert('Erro ao atualizar o pedido.');
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar pedido:', error);
+            }
+        });
+
+        async function carregarPedidos() {
+            try {
+                const response = await fetch('http://localhost:3000/pedidos');
+                const paises = await response.json();
+
+                const selectPaises = document.getElementById('pedido_id');
+
+                paises.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id; // Ou algum valor único do país
+                    option.text = item.nome; // Ou algum campo que contenha o nome do país
+                    selectPaises.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao buscar países:', error);
+            }
+        }
+
+        carregarPedidos();
+
+        // Carregar o pedido para edição quando a página carrega
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        carregarPedidoParaEdicao(id);
+    </script>
+</body>
+</html>
